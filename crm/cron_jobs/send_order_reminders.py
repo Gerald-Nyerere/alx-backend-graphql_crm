@@ -4,6 +4,7 @@ Script: send_order_reminders.py
 Purpose: Query recent orders (last 7 days) via GraphQL and log them.
 """
 
+from gql import gql, Client
 import requests
 from datetime import datetime, timedelta
 
