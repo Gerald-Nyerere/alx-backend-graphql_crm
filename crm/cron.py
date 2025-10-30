@@ -28,3 +28,44 @@ def log_crm_heartbeat():
     except Exception as e:
         with open(log_file, "a") as f:
             f.write(f"{timestamp} GraphQL hello check error: {e}\n")
+
+
+def update_low_stock():
+    """Executes UpdateLowStockProducts mutation and logs results."""
+    transport = RequestsHTTPTransport(
+        url="http://localhost:8000/graphql/",  # Adjust if running on another host or port
+        verify=False,
+        retries=3,
+    )
+
+    client = Client(transport=transport, fetch_schema_from_transport=True)
+
+    mutation = gql("""
+        mutation {
+            updateLowStockProducts {
+                updatedProducts {
+                    id
+                    name
+                    stock
+                }
+                message
+            }
+        }
+    """)
+
+    log_file = "/tmp/low_stock_updates_log.txt"
+    try:
+        response = client.execute(mutation)
+        updated_products = response["updateLowStockProducts"]["updatedProducts"]
+        message = response["updateLowStockProducts"]["message"]
+
+        with open(log_file, "a") as f:
+            f.write(f"\n[{datetime.datetime.now()}] {message}\n")
+            for p in updated_products:
+                f.write(f" - {p['name']}: new stock = {p['stock']}\n")
+
+        print("✅ Low-stock products updated successfully.")
+    except Exception as e:
+        with open(log_file, "a") as f:
+            f.write(f"\n[{datetime.datetime.now()}] ❌ Error: {str(e)}\n")
+        print("❌ Cron job failed:", str(e))
