@@ -6,7 +6,7 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 cd "$(dirname "$0")/../.." || exit 1
 
-COUNT=$(python3 manage.py shell <<EOF
+count=$(python3 manage.py shell <<EOF
 from datetime import timedelta
 from django.utils import timezone
 from crm.models import Customer
